@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.mapper.MemberMapper">
+
+<!-- 여기 매퍼의 네임스페이스와 호출을 보낼 mapper의 이름이 동일해야함. -->
+	
+	<!-- 모든 맴버의 정보를 묶어서 보냄으로 리절트타입은 아래와 같음 -->
+	<select id="registerCheck" parameterType="String" resultType="kr.spring.entity.Member">
+		SELECT * FROM MEMBER WHERE MEMID =#{MEMID}	
+	</select>
+	
+	<insert id="join" parameterType="kr.spring.entity.Member">
+	<!-- 위의 인서트 속성을 알기 어렵다면 매퍼java에 있는 값을 참고할 것. 
+		INSERT문은 애초에 RESULTTYPE을 적지 않음.-->
+		
+		<!-- 아래 벨류값은 필드값을 넣어줘야함으로 대소문자를 적절히 구별한다. 순서를 잘 지킬것. -->
+		INSERT INTO MEMBER(MEMIDX, MEMID, MEMPASSWORD, MEMNAME, MEMAGE, MEMGENDER, MEMEMAIL, MEMPROFILE) VALUES((SELECT IFNULL(MAX(MEMIDX)+1,1) FROM MEMBER MEM),#{memID},#{memPassword},#{memName},#{memAge},#{memGender},#{memEmail},#{memProfile})
+	</insert>
+	
+	<!-- 매개변수와 리터타입 둘 다 있음. -->
+	<select id="login"  resultType="kr.spring.entity.Member" parameterType="kr.spring.entity.Member">
+		SELECT * FROM MEMBER WHERE MEMID=#{memID} AND MEMPASSWORD=#{memPassword}
+	</select>
+	
+	<!-- 업데이트 -->
+	<update id="update" parameterType="kr.spring.entity.Member" >
+		UPDATE MEMBER SET MEMPASSWORD = #{memPassword}, MEMNAME=#{memName}, MEMAGE=#{memAge}, MEMGENDER=#{memGender}, MEMEMAIL=#{memEmail}, MEMPROFILE=#{memProfile} WHERE MEMID=#{memID}
+	</update>
+	
+	<!-- 프로필 업데이트 -->
+	<update id="profileUpdate" parameterType="kr.spring.entity.Member">
+		UPDATE MEMBER SET MEMPROFILE=#{memProfile} WHERE MEMID=#{memID}
+	</update>
+	
+	<!-- 이전 프로필 가져오기 -->
+	<select id="getMember" resultType="kr.spring.entity.Member" parameterType="String">
+		SELECT MEMPROFILE FROM MEMBER WHERE MEMID=#{memID}
+	</select>
+	
+</mapper>
