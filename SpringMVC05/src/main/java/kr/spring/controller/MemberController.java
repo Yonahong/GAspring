@@ -2,6 +2,7 @@ package kr.spring.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
+import kr.spring.entity.Auth;
 import kr.spring.entity.Member;
 import kr.spring.mapper.MemberMapper;
 
@@ -93,12 +95,32 @@ public class MemberController {
 				m.setMemProfile("");
 				
 				//비밀번호 암호화코드
+				
+				//pwencoder는 이미 만들어진것이고 위에 autowired로 땡겨와(주입)서 사용하는것임.
+				//security config에 bean으로 만들어져있음.
 				String encyPw = pwEncoder.encode(m.getMemPassword());
 				m.setMemPassword(encyPw);
 				//아래 cnt는 회원가입성공여부 판단이고 1이면 성공으로 볼것임.
 				int cnt = Mapper.join(m);
 				
-				
+				//권한 테이블에 회원의 권한을 저장
+				//하나의 권한은 하나의 Auth VO로 묶을 수 있음
+				//auth에는 아이디, 권한, 번호등의 정보가 있고
+				//권한에 대한 내용들은 member m 에 있음.
+				//가진 리스트의 갯수만큼 반복하며 리스트에서 하나씩 꺼낼것임
+				List<Auth>list = m.getAuthList();
+				for(Auth auth : list) {
+					if(auth.getAuth() != null) {
+						//권한값이 있을때만 권한테이블에 값을 넣음.
+						//예를들어 admin 권한을 줄때 0과 1의 자리에 값을 비워둬야하기때문
+						Auth saveVO = new Auth();
+						saveVO.setMemID(m.getMemID());
+						saveVO.setAuth(auth.getAuth());
+						//권한 저장
+						Mapper.authInsert(saveVO);
+						
+					}
+				}
 				
 				System.out.println(encyPw);
 				
@@ -107,7 +129,14 @@ public class MemberController {
 					rttr.addFlashAttribute("msgType", "성공메세지");
 					rttr.addFlashAttribute("msg", "회원가입에 성공했습니다.");
 					//회원가입 성공 시 로그인 처리까지 시키기
-					session.setAttribute("mvo", m);
+					
+					//회원가입 성공 시 회원정보+권한정보 가져오기.
+					Member mvo = Mapper.getMember(m.getMemID());
+					
+					
+					
+					session.setAttribute("mvo", mvo);
+					
 					//회원가입에 성공한 정보는 위의 m에 저장되어있음
 					//세션을 통해서 처리할 것임.
 					//스프링에서 리퀘스트객체가 없음으로 
@@ -143,11 +172,18 @@ public class MemberController {
 	@RequestMapping("/login.do")
 	public String login(Member m, HttpSession session, RedirectAttributes rttr) {
 		Member mvo = Mapper.login(m);
-			if(mvo != null) {
-				rttr.addFlashAttribute("msgType", "성공메세지");
-				rttr.addFlashAttribute("msg", "로그인에 성공했습니다.");
-				session.setAttribute("mvo",mvo);
-				return "redirect:/";
+			if(mvo != null && pwEncoder.matches(m.getMemPassword(), mvo.getMemPassword())) {
+				
+					//비밀번호 일치여부 체크(sql 쿼리문으로는 암호화가 되어있기때문에 비교가 불가함)
+					//암호화할때 사용했던 pwencoder를 사용해서 복호화
+					//앞에는 입력한 값, 뒤에는 암호화된 값이 들어가서 동일한지를 판단함
+				
+					rttr.addFlashAttribute("msgType", "성공메세지");
+					rttr.addFlashAttribute("msg", "로그인에 성공했습니다.");
+					session.setAttribute("mvo",mvo);
+					return "redirect:/";
+				
+				
 			}else {
 				rttr.addFlashAttribute("msgType", "실패메세지");
 				rttr.addFlashAttribute("msg", "로그인에 실패했습니다.");
@@ -168,12 +204,13 @@ public class MemberController {
 		//문제.
 		//mapper의 update메소드를 통해 해당 회원의 정보를 수정하시오
 		
-		//조건 1 입력 안한 데이터가 있을 시 updateFOrm.jsp로 돌려보내면서 updateForm.jsp에서
-		// 모든 내용을 입력하세요 라는 모달창을 띄울 것.
+		// 입력 안한 데이터가 있을 시 updateFOrm.jsp로 돌려보내면서 updateForm.jsp에서
+		// 모든 내용을 입력하세요 라는 모달창.
 		if(m.getMemPassword() == null || m.getMemPassword().equals("")
 				|| m.getMemName() == null || m.getMemName().equals("")
 				|| m.getMemAge() == 0
-				|| m.getMemEmail() == null || m.getMemEmail().equals("")) 
+				|| m.getMemEmail() == null || m.getMemEmail().equals("")
+				|| m.getAuthList().size() == 0) 
 			{
 			// 실패시 updateFOrm.Form.do로 msgType과 msg 내용을 보내야함.
 			//msgType : 실패메세지, msg : 모든 내용을 입력하시오.
@@ -188,6 +225,29 @@ public class MemberController {
 				
 				//Member mvo = (Member)session.getattribute("mvo")
 				//m.setMemProfile(mvo.getMemProfile())
+				
+			//업데이트 시 입력된 암호에 대한 암호화가 필요함
+			String EncyPw = pwEncoder.encode(m.getMemPassword());
+			m.setMemPassword(EncyPw);
+			
+			//권한삭제
+			Mapper.authDelete(m.getMemID());
+			
+			//삭제한 권한 다시 부여
+			List<Auth>list = m.getAuthList();
+			for(Auth auth : list) {
+				if(auth.getAuth() != null) {
+					//권한값이 있을때만 권한테이블에 값을 넣음.
+					//예를들어 admin 권한을 줄때 0과 1의 자리에 값을 비워둬야하기때문
+					Auth saveVO = new Auth();
+					saveVO.setMemID(m.getMemID());
+					saveVO.setAuth(auth.getAuth());
+					//권한 저장
+					Mapper.authInsert(saveVO);
+					
+				}
+			}
+				
 			int cnt = Mapper.update(m);
 			
 			if(cnt == 1) {
@@ -234,7 +294,6 @@ public class MemberController {
 		try {
 			multi = new MultipartRequest(request, savePath, fileMaxSize, "UTF-8", new DefaultFileRenamePolicy());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//기존 유저의 이미지 삭제

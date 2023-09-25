@@ -12,14 +12,16 @@
 	<insert id="join" parameterType="kr.spring.entity.Member">
 	<!-- 위의 인서트 속성을 알기 어렵다면 매퍼java에 있는 값을 참고할 것. 
 		INSERT문은 애초에 RESULTTYPE을 적지 않음.-->
+		<!-- 이전에는 값을 하나씩 늘려줬다면 이번엔 select ifnull로 하나씩 넣어줌 -->
 		
 		<!-- 아래 벨류값은 필드값을 넣어줘야함으로 대소문자를 적절히 구별한다. 순서를 잘 지킬것. -->
 		INSERT INTO MEMBER(MEMIDX, MEMID, MEMPASSWORD, MEMNAME, MEMAGE, MEMGENDER, MEMEMAIL, MEMPROFILE) VALUES((SELECT IFNULL(MAX(MEMIDX)+1,1) FROM MEMBER MEM),#{memID},#{memPassword},#{memName},#{memAge},#{memGender},#{memEmail},#{memProfile})
 	</insert>
 	
-	<!-- 매개변수와 리터타입 둘 다 있음. -->
-	<select id="login"  resultType="kr.spring.entity.Member" parameterType="kr.spring.entity.Member">
-		SELECT * FROM MEMBER WHERE MEMID=#{memID} AND MEMPASSWORD=#{memPassword}
+	<!-- 매개변수와 리턴타입 둘 다 있음. -->
+	<select id="login"  resultMap ="memberMap" parameterType="kr.spring.entity.Member">
+		SELECT * FROM MEMBER mem LEFT OUTER JOIN Auth auth on
+		mem.MEMID = auth.MEMID WHERE mem.MEMID = #{memID}
 	</select>
 	
 	<!-- 업데이트 -->
@@ -33,8 +35,40 @@
 	</update>
 	
 	<!-- 이전 프로필 가져오기 -->
-	<select id="getMember" resultType="kr.spring.entity.Member" parameterType="String">
-		SELECT MEMPROFILE FROM MEMBER WHERE MEMID=#{memID}
+	<!-- MEM을 기준으로 권한테이블에서 해당 아이디의 권한을 불러올것임. -->
+	<select id="getMember" resultMap="memberMap" parameterType="String">
+		SELECT * FROM MEMBER mem LEFT OUTER JOIN Auth auth on
+		mem.MEMID = auth.MEMID WHERE mem.MEMID = #{memID}
 	</select>
+	
+	<resultMap type ="kr.spring.entity.Auth" id="authMap">
+		<id property="no" column="no"/>
+		<result property="memID" column="memID"/>
+		<result property="auth" column="auth"/>
+	</resultMap>
+	
+	<!-- 권한까지 받아오기 위해 새롭게 만드는 맴버테이블 -->
+	<resultMap type ="kr.spring.entity.Member" id="memberMap">
+		<id property="memIdx" column="memIdx"/>
+		<result property="memID" column="memID"/>
+		<result property="memPassword" column="memPassword"/>
+		<result property="memName" column="memName"/>
+		<result property="memAge" column="memAge"/>
+		<result property="memGender" column="memGender"/>
+		<result property="memEmail" column="memEmail"/>
+		<result property="memProfile" column="memProfile"/>
+		<!-- auth는 배열, 배열은 collection으로 표현 -->
+		<collection property="authList" resultMap="authMap" />
+	</resultMap>
+	
+	<!-- 권한 부여 -->
+	<insert id ="authInsert" parameterType ="kr.spring.entity.Auth">
+		INSERT INTO AUTH(MEMID, AUTH) VALUES(#{memID}, #{auth})
+	</insert>
+	
+	<!-- 권한 삭제 -->
+	<delete id="authDelete" parameterType="String">
+		DELETE FROM AUTH WHERE MEMID=#{memID}	
+	</delete>
 	
 </mapper>

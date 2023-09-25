@@ -50,16 +50,33 @@
      		<li>
      			<c:if test="${mvo.memProfile ne ''}">
      				<img class="img-circle" style="width: 50px; height: 50px;" src="${contextPath}/resources/upload/${mvo.memProfile}">
-     				${mvo.memName}님 반갑습니다.
+     				
      			</c:if>
      			
      			<c:if test="${mvo.memProfile eq ''}">
      				<img class="img-circle" style="width: 50px; height: 50px;" src="${contextPath}/resources/images/defaultpro.png">
-     				${mvo.memName}님 반갑습니다.
      			</c:if>
+     			
+     			${mvo.memName}님 반갑습니다.
+     			[
+					<!-- 권한 정보 표기창.-->     			
+					<!-- 가진 권한리스트의 수만큼 반복하며 출력.-->
+					<c:forEach items="${mvo.authList}" var="auth">
+						<c:choose>
+							<c:when test="${auth.auth eq 'ROLE_USER'}">
+								U
+							</c:when>
+							<c:when test="${auth.auth eq 'ROLE_MANAGER'}">
+								M
+							</c:when>
+							<c:when test="${auth.auth eq 'ROLE_ADMIN'}">
+								A
+							</c:when>
+						</c:choose>
+					</c:forEach>     			
+     			
+     			]
      		</li>
-     		
-     
 	        <li><a href="${contextPath}/updateForm.do"><span class="glyphicon glyphicon-wrench">회원정보수정</span></a></li>
 	        <li><a href="${contextPath}/imageForm.do"><span class="glyphicon glyphicon-camera">프로필사진등록</span></a></li>
 	        <li><a href="${contextPath}/logout.do"><span class="glyphicon glyphicon-log-out">로그아웃</span></a></li>
