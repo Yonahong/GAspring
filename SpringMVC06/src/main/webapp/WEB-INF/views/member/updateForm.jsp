@@ -15,7 +15,7 @@
 <body>
 	<div class="container">
 	<jsp:include page="../common/header.jsp"></jsp:include>
-	  <h2>SpringMVC05</h2>
+	  <h2>SpringMVC06</h2>
 	  <div class="panel panel-default">
 	    <div class="panel-heading">Board</div>
 	    <div class="panel-body">

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.mapper.BoardMapper">
+<!-- mybatis의 설계에 따라 태그를 가져와서 쓸 수 있는데 이를 스키마라고 한다. -->
+
+
+<!-- 
+	sql문을 여기에 저장할것임
+	위의 mapper의 namespace는 인터페이스 이름을 명시해서 찾아온다
+	그렇기때문에 이름을 동일하게 맞춰줘서 편의성을 준다.
+	아래의 select id는 매소드명과 똑같이 해야함
+ -->
+ 
+ <!-- 보드매퍼에서 보낸 메소드명으로 이 보드매퍼에서 실행할것임 -->
+ 
+ 
+ <!-- 아래는 값을 돌려주는 코드이기에 resulttype로 어레이리스트의 보드타입으로
+ 	돌려줘야함 아래처럼 보드의 경로를 적어주면 해당하는 내용을 어레이리스트로 묶어서 가져와줌-->
+<select id="getLists" resultType="kr.spring.entity.Board">
+	SELECT * FROM BOARD ORDER BY INDATE DESC
+</select>
+
+<!-- 파람타입의 매개변수가 보드임으로 보드를 파람타입으로 불러옴 -->
+<insert id="boardInsert" parameterType="kr.spring.entity.Board">
+	INSERT INTO BOARD (TITLE, CONTENT, WRITER)
+	VALUES(#{title}, #{content}, #{writer})
+</insert>
+
+<!-- idx값을 통해서 글을 조회함 위에도 select 값이 있음으로 id를 각 원하는 매소드명과
+동일하게 해서 어느 select문을 실행할지 지정해준다
+mybatis환경에서 parametertype는 생략할 수 있지만 쓰는것을 권장한다.
+받아온 매개변수인 IDX를 아래와 같이 SQL문에 넣어준다.-->
+<select id="boardContent" parameterType="int" resultType="kr.spring.entity.Board">
+	SELECT * FROM BOARD WHERE IDX = #{idx}
+</select>
+
+<!-- idx를 사용한 게시글 삭제 -->
+<delete id="boardDelete" parameterType="int">
+	DELETE FROM BOARD WHERE IDX = #{idx}
+</delete>
+
+<!-- 파람타입의 매개변수가 보드임으로 보드를 파람타입으로 불러옴 -->
+<update id="boardUpdate" parameterType="kr.spring.entity.Board">
+	UPDATE BOARD
+	SET TITLE = #{title}, 
+	CONTENT = #{content}, 
+	WRITER = #{writer} 
+	WHERE IDX =#{idx}
+</update>
+
+<!-- 게시글 조회수 증가 -->
+<update id="boardCount" parameterType="int">
+	UPDATE BOARD
+	set COUNT = COUNT + 1
+	WHERE IDX = #{idx}
+</update>
+
+
+</mapper>

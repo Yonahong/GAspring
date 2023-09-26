@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,6 +33,12 @@ public class MemberController {
 	//메모리에 올려있는 bean을 가져와서 사용할 때 autowired
 	@Autowired
 	private PasswordEncoder pwEncoder;
+	
+	//비 로그인 사용자의 접근 시 요청되는 url
+	@GetMapping("/access-denied")
+	public String showAccessDenied() {
+		return "access-denied";
+	}
 	
 	@RequestMapping("/joinForm.do")
 	public String joinForm() {
@@ -168,28 +175,29 @@ public class MemberController {
 	public String loginFormString() {
 		return "member/loginForm";
 	}
-	
-	@RequestMapping("/login.do")
-	public String login(Member m, HttpSession session, RedirectAttributes rttr) {
-		Member mvo = Mapper.login(m);
-			if(mvo != null && pwEncoder.matches(m.getMemPassword(), mvo.getMemPassword())) {
-				
-					//비밀번호 일치여부 체크(sql 쿼리문으로는 암호화가 되어있기때문에 비교가 불가함)
-					//암호화할때 사용했던 pwencoder를 사용해서 복호화
-					//앞에는 입력한 값, 뒤에는 암호화된 값이 들어가서 동일한지를 판단함
-				
-					rttr.addFlashAttribute("msgType", "성공메세지");
-					rttr.addFlashAttribute("msg", "로그인에 성공했습니다.");
-					session.setAttribute("mvo",mvo);
-					return "redirect:/";
-				
-				
-			}else {
-				rttr.addFlashAttribute("msgType", "실패메세지");
-				rttr.addFlashAttribute("msg", "로그인에 실패했습니다.");
-				return "redirect:/loginForm.do";
-			}
-	}
+
+	//로그인 기능은 스프링 내부 시큐리티를 통해서 사용할것임.
+//	@RequestMapping("/login.do")
+//	public String login(Member m, HttpSession session, RedirectAttributes rttr) {
+//		Member mvo = Mapper.login(m);
+//			if(mvo != null && pwEncoder.matches(m.getMemPassword(), mvo.getMemPassword())) {
+//				
+//					//비밀번호 일치여부 체크(sql 쿼리문으로는 암호화가 되어있기때문에 비교가 불가함)
+//					//암호화할때 사용했던 pwencoder를 사용해서 복호화
+//					//앞에는 입력한 값, 뒤에는 암호화된 값이 들어가서 동일한지를 판단함
+//				
+//					rttr.addFlashAttribute("msgType", "성공메세지");
+//					rttr.addFlashAttribute("msg", "로그인에 성공했습니다.");
+//					session.setAttribute("mvo",mvo);
+//					return "redirect:/";
+//				
+//				
+//			}else {
+//				rttr.addFlashAttribute("msgType", "실패메세지");
+//				rttr.addFlashAttribute("msg", "로그인에 실패했습니다.");
+//				return "redirect:/loginForm.do";
+//			}
+//	}
 	
 	@RequestMapping("/updateForm.do")
 	public String updateForm() {
