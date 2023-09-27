@@ -44,7 +44,7 @@ public class MemberUser extends User{
 		super(mvo.getMemID(),mvo.getMemPassword(), mvo.getAuthList().stream().map(auth -> new SimpleGrantedAuthority(auth.getAuth()))
 				.collect(Collectors.toList()));
 		
-		this.member = mvo;
+		this.member = mvo; //나머지 주석처리를 위해 사용함.
 	}
 	
 	

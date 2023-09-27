@@ -2,6 +2,17 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
+<!-- spring security에서 제공하는 태그라이브러리 -->
+<%@ taglib prefix="security" uri="http://www.springframework.org/security/tags"%>
+
+<!-- spring security에서 제공하는 계정정보 (SecurityContext) 안의 계정정보 가져오기 -->
+<!-- 로그인 한 계정정보 맴버유저디테일의 memberusermvo를 가져온것임 -->
+<c:set var="mvo" value="${SPRING_SECURITY_CONTEXT.authentication.principal}"/>
+
+<!-- 권한정보 호출 -->
+<c:set var="auth" value="${SPRING_SECURITY_CONTEXT.authentication.authorities}"/>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,7 +65,8 @@
 		<div class="panel-body" id="wform" style="display : none;">
 		<!-- 폼태그는 동기방식임으로 폼태그를 삭제한다. -->
 			<form id="frm">
-			<input type="hidden" name="memID" value="${mvo.memID}">
+			<!-- memid는 보안적용 이전의 기능임으로 앞에 member를 적용해준다. -->
+			<input type="hidden" name="memID" value="${mvo.member.memID}">
 	    	<table class="table">
 	    	
 	    		<tr>
@@ -69,7 +81,7 @@
 	    		
 	    		<tr>
 		    		<td>작성자</td>
-		    		<td><input readonly="readonly" value="${mvo.memName}" type="text" name="writer" class="form-control"></td>
+		    		<td><input readonly="readonly" value="${mvo.member.memName}" type="text" name="writer" class="form-control"></td>
 	    		</tr>
 	    		
 	    		<tr>
@@ -158,7 +170,8 @@
 				//수정 삭제 화면
 				//조건문 안에서 EL식을 쓰고싶다면 문자열로 감싸줘야함
 				//1개 게시글 안의 모든 정보가 담겨있는 obj에서 memid를 사용
-				if("${mvo.memID}" == obj.memID){
+				
+				if("${mvo.member.memID}" == obj.memID){
 				listHtml += "<br>";
 				listHtml += "<span id='ub"+obj.idx+"'>";
 				listHtml += "<button onclick='goUpdateForm(" + obj.idx + ")' class='btn btn-sm btn-success'>수정화면</button></span> &nbsp;"

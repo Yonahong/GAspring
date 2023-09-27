@@ -11,6 +11,7 @@
 
 <!-- spring security에서 제공하는 계정정보 (SecurityContext) 안의 계정정보 가져오기 -->
 <!-- 로그인 한 계정정보 맴버유저디테일의 memberusermvo를 가져온것임 -->
+
 <c:set var="mvo" value="${SPRING_SECURITY_CONTEXT.authentication.principal}"/>
 
 <!-- 권한정보 호출 -->
@@ -55,7 +56,7 @@
       <ul class="nav navbar-nav navbar-right">
       
       		<!-- 프로필 이미지 띄워주기 -->
-      		
+      		<!-- 아래는 memberuser.java에서 그 안의 맴버메소드. 그 안의 프로필을 가져오는 코드임 -->
      		<li>
      			<c:if test="${mvo.member.memProfile ne ''}">
      				<img class="img-circle" style="width: 50px; height: 50px;" src="${contextPath}/resources/upload/${mvo.member.memProfile}">
@@ -98,7 +99,8 @@
      		</li>
 	        <li><a href="${contextPath}/updateForm.do"><span class="glyphicon glyphicon-wrench">회원정보수정</span></a></li>
 	        <li><a href="${contextPath}/imageForm.do"><span class="glyphicon glyphicon-camera">프로필사진등록</span></a></li>
-	        <li><a href="${contextPath}/logout.do"><span class="glyphicon glyphicon-log-out">로그아웃</span></a></li>
+	        <!-- 아래는 자바스크립트의 로그아웃 기능을 실행하겠다는 href -->
+	        <li><a href="javascript:logout()"><span class="glyphicon glyphicon-log-out">로그아웃</span></a></li>
       </ul>
       
      </security:authorize>
@@ -108,7 +110,33 @@
   </div>
 </nav>
 
-
+<script type="text/javascript">
+	//토큰값 가져오기 (CSRF)
+	var csrfHeaderName = "${_csrf.headerName}";
+	var csrfTokenValue = "${_csrf.token}";
+	
+	function logout(){
+		$.ajax({
+			url : "${contextPath}/logout",
+			//위는 이전과 동일하게 로그아웃처리 진행하는 코드이지만
+			//아래의 타입(방식)을 post방식으로 하면 시큐리티의 로그아웃을 진행한다.
+			type : "post",
+			beforeSend : function(xhr){
+				//실행할때 가장 위쪽에서 실행되는 부분 beforesend
+				xhr.setRequestHeader(csrfHeaderName, csrfTokenValue)
+			
+			
+			},
+			success : function(){
+				//성공 시 페이지로 돌아오며 새로고침이 되어야한다. location 사용
+				location.href = "${contextPath}/"
+			},
+			error : function(){
+				alert("error");
+			}
+		});
+	}
+</script>
 
 
 </body>

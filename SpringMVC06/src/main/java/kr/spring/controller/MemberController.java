@@ -7,9 +7,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.ibatis.javassist.tools.reflect.CannotCreateException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +27,9 @@ import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 import kr.spring.entity.Auth;
 import kr.spring.entity.Member;
+import kr.spring.entity.MemberUser;
 import kr.spring.mapper.MemberMapper;
+import kr.spring.security.MemberUserDetailsService;
 
 @Controller
 public class MemberController {
@@ -29,10 +37,15 @@ public class MemberController {
 	@Autowired
 	private MemberMapper Mapper;
 	
-	
 	//메모리에 올려있는 bean을 가져와서 사용할 때 autowired
 	@Autowired
 	private PasswordEncoder pwEncoder;
+	
+	@Autowired
+	// 정보를 수정할 수 있는 객체가 필요함
+	//회원정보 수정 후 Spring Security Context에 접근하기 위한 객체
+	private MemberUserDetailsService memberUserDetailsService;
+	
 	
 	//비 로그인 사용자의 접근 시 요청되는 url
 	@GetMapping("/access-denied")
@@ -138,16 +151,13 @@ public class MemberController {
 					//회원가입 성공 시 로그인 처리까지 시키기
 					
 					//회원가입 성공 시 회원정보+권한정보 가져오기.
-					Member mvo = Mapper.getMember(m.getMemID());
-					
-					
-					
-					session.setAttribute("mvo", mvo);
+					//Member mvo = Mapper.getMember(m.getMemID());
+					//session.setAttribute("mvo", mvo);
 					
 					//회원가입에 성공한 정보는 위의 m에 저장되어있음
 					//세션을 통해서 처리할 것임.
 					//스프링에서 리퀘스트객체가 없음으로 
-					return "redirect:/";
+					return "redirect:/loginForm.do";
 				}else {
 					System.out.println("회원가입 실패");
 					rttr.addFlashAttribute("msgType", "실패메세지");
@@ -164,12 +174,14 @@ public class MemberController {
 
 	
 	}
-	
-	@RequestMapping("/logout.do")
-	public String logout(HttpSession session) {
-		session.invalidate();
-		return "redirect:/";
-	}
+
+		//이 로그아웃 기능은 보안처리가 안되어있음으로 사용안함
+	//	@RequestMapping("/logout.do")
+	//	public String logout(HttpSession session) {
+	//		session.invalidate();
+	//		System.out.println("로그아웃실행");
+	//		return "redirect:/";
+	//	}
 	
 	@RequestMapping("/loginForm.do")
 	public String loginFormString() {
@@ -222,6 +234,9 @@ public class MemberController {
 			// 실패시 updateFOrm.Form.do로 msgType과 msg 내용을 보내야함.
 			//msgType : 실패메세지, msg : 모든 내용을 입력하시오.
 			//RedirectAttributes - 리다이렉트 방식으로 이동할 때 보낼 데이터를 저장하는 객체
+			
+
+			
 		
 			rttr.addFlashAttribute("msgType", "실패메세지");
 			rttr.addFlashAttribute("msg", "모든 내용을 입력하세요");
@@ -270,6 +285,25 @@ public class MemberController {
 				//회원가입에 성공한 정보는 위의 m에 저장되어있음
 				//세션을 통해서 처리할 것임.
 				//스프링에서 리퀘스트객체가 없음으로 
+				
+				//회원정보 수정 성공시 스프링시큐리티 컨텍스트에 회원정보 다시 넣기
+				//실제 Spring Security 기능을 실행하는 Authentication 객체 가져오기
+				//Authentication 객체는 내가 만든 MemeberUserDetailsService를 통해
+				//DB 안에 값을 넣기도 하지만
+				//ContextHolder 아래 context 안에 있는 회원의 값을 가졍로 수 도 있다.
+				Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+				//기존 회원의 자료(Context)를 가져올것임
+				//update의 principal 가져오기와 같음
+				//다만 아래의 코드는 user클래스로 값을 가져와서 사용하기때문에
+				//직접 만든 클래스가 아닌 부모형태가 자식형태로 들어가는 다운캐스팅을 해줘야함
+				//아래는 그 다운캐스팅을 한 코드.
+				MemberUser userAccount = (MemberUser)authentication.getPrincipal();
+				//Secutiry Context 안에 새로운 (회원정보수정한) 정보 넣기
+				//getcontext로 가져오고 setauthen...로 넣어준다.
+				Authentication newAuthentication = createNewAuthentication(authentication,userAccount.getMember().getMemID());
+				
+				SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+				
 				return "redirect:/";
 			}else {
 				System.out.println("회원수정 실패");
@@ -281,6 +315,26 @@ public class MemberController {
 		}
 
 }
+
+	//기존 spring context라는 보안 공간에 저장된 회원정보 memberuser를 꺼내서 사용하고 있었음.
+	//회원정보수정을 하는 순간 memberuser 정보를 업데이트해야하지만 회원정보수정을 하고 난 뒤 다시 로그인시켜서
+	//새로고침을 한것임. authentication이 정보를 갖고있음으로 authenticaton에서 useraccount로 로그인을 진행시켜준것임.
+	//spring contextholder에 새로운 newauthenticaton을 넣어줘야하는데, 그러려면 기존 권한과 로그인한 사람의 아이디를 전달해준것임
+	//그러고 난 후 newPrincipal 메서드로 다시 로그인시켜준것임.
+	
+	private Authentication createNewAuthentication(Authentication currentAuth, String username) {
+		//여기에서 새롭게 DB의 회원정보를 가져올것임.
+		//현재 로그인기능은 맴버유저디테일서비스의 로긴메소드인 loaduserbyusername을 통해 진행됨
+		//리턴타입인 userdetails로 받아준다.
+		UserDetails newPrincipal = memberUserDetailsService.loadUserByUsername(username);
+		//비밀번호 관련 보안작업을 해줘야함.
+		UsernamePasswordAuthenticationToken newAuth = 
+				new UsernamePasswordAuthenticationToken(newPrincipal, currentAuth.getCredentials(),newPrincipal.getAuthorities());
+		
+		newAuth.setDetails(currentAuth.getDetails());
+		
+		return newAuth;
+	}
 
 	@RequestMapping("/imageForm.do")
 	public String imageForm() {
@@ -310,7 +364,8 @@ public class MemberController {
 		//기존 유저의 이미지 삭제
 		// - 로그인한 사람의 기존 프로필 값 가져와야함
 		//세션 안의 값 가져올땐 겟어트리뷰트
-		String memID = ((Member)session.getAttribute("mvo")).getMemID();
+		String memID = multi.getParameter("memID");
+				//기존방식 : ((Member)session.getAttribute("mvo")).getMemID();
 		
 		//getMember 메소드는 memID와 일치하는 회원의 정보(Member)를 가져온다.
 		String oldImg = Mapper.getMember(memID).getMemProfile();
@@ -361,8 +416,14 @@ public class MemberController {
 		Mapper.profileUpdate(mvo);
 		
 		//사진 업데이트 시 수정된 회원정보를 다시 가져와서 세션에 담는다
-		Member m = Mapper.getMember(memID);
-		session.setAttribute("mvo", m);
+		//보안처리 후에는 세션에 값이 있지 않기때문에 다른 방식을 사용.
+		//Member m = Mapper.getMember(memID);
+		//session.setAttribute("mvo", m);
+		
+		Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+		MemberUser userAccount = (MemberUser)authentication.getPrincipal();
+		Authentication newAuthentication = createNewAuthentication(authentication,userAccount.getMember().getMemID());
+		SecurityContextHolder.getContext().setAuthentication(newAuthentication);
 		
 		rttr.addFlashAttribute("msgType", "성공메세지");
 		rttr.addFlashAttribute("msg", "프로필 이미지 변경 성공");	

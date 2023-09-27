@@ -34,6 +34,7 @@ public class MemberUserDetailsService implements UserDetailsService {
 		
 		if(mvo != null) {
 			//사용자가 존재할 경우
+			//Spring Security Context 안에 회원의 정보를 저장함.
 			return new MemberUser(mvo); 
 		}else {
 			//유저가 존재하지 않을 경우
