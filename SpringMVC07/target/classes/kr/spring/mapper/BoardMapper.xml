@@ -7,5 +7,33 @@
 		ORDER BY BOARDGROUP DESC
 	</select>
 	
+	<insert id="insert" parameterType="kr.spring.entity.Board">
+		INSERT INTO TBLBOARD(IDX, MEMID, TITLE, CONTENT, WRITER
+		, BOARDGROUP, BOARDSEQUENCE, BOARDLEVEL, BOARDAVAILABLE)
+		SELECT IFNULL(MAX(IDX) +1, 1), #{memID}, #{title}, #{content}
+		,#{writer}, IFNULL(MAX(BOARDGROUP) +1, 1), 0, 0, 1
+		FROM TBLBOARD
+	</insert>
+
+	<insert id="insertSelectKey" parameterType="kr.spring.entity.Board">
+		<selectKey keyProperty="idx,boardGroup" resultType="kr.spring.entity.Board" order="BEFORE">
+			<!-- idx와 boardGroup을 keyproperty로 묶어서 resulttype의 board로 묶여서 parametertype의 board로 보내진다 -->
+			<!-- 위의 insert insert문은 sql문으로, 여기에 insertselectkey는 스프링의 동적 쿼리로 진행한것임. -->
+			SELECT IFNULL(MAX(IDX) + 1 , 1) as idx,
+				   IFNULL(MAX(BOARDGROUP) +1 , 1) as boardGroup
+			FROM TBLBOARD
+		</selectKey>
+		INSERT INTO TBLBOARD(IDX, MEMID, TITLE, CONTENT, WRITER
+		, BOARDGROUP, BOARDSEQUENCE, BOARDLEVEL, BOARDAVAILABLE)
+		VALUES(#{idx},#{memID},#{title},#{content},#{writer},#{boardGroup},0,0,1)
+	</insert>
+
+	<select id="login" parameterType="kr.spring.entity.Member" resultType="kr.spring.entity.Member">
+		SELECT * FROM TBLMEMBER WHERE MEMID = #{memID} and MEMPWD=#{memPwd}
+	</select>
+	
+	<select id="read" parameterType="int" resultType="kr.spring.entity.Board">
+		SELECT * FROM TBLBOARD WHERE IDX=#{idx}
+	</select>
 
 </mapper>

@@ -22,10 +22,14 @@ SELECT IFNULL(MAX(IDX+1),1),
 'admin', '공지사항입니다.', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
 NOW(), 0, IFNULL(MAX(BOARDGROUP+1),1),0,0,1
 FROM TBLBOARD;
+
+INSERT INTO TBLBOARD
 SELECT IFNULL(MAX(IDX+1),1),
 'admin', '공지사항입니다2222.', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
 NOW(), 0, IFNULL(MAX(BOARDGROUP+1),1),0,0,1
 FROM TBLBOARD;
+
+INSERT INTO TBLBOARD
 SELECT IFNULL(MAX(IDX+1),1),
 'admin', '공지사항입니다.3333', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
 NOW(), 0, IFNULL(MAX(BOARDGROUP+1),1),0,0,1
