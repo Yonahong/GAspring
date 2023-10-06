@@ -68,9 +68,16 @@
 	    		 <tr>
 	    		 	<td>${i.count}</td>
 	    		 	<td>
-		    		 	<a href="${cpath}/board/get?idx=${vo.idx}">
-		    		 		${vo.title}
-		    		 	</a>
+	    		 	<a href="${cpath}/board/get?idx=${vo.idx}">
+	    		 	<!-- 게시글 및 댓글 출력부 -->
+		    		 	<c:if test="${vo.boardLevel > 0}">
+		    		 		<c:forEach begin="0" end="${vo.boardLevel}" step="1">
+		    		 			<span style="padding-left: 15px"> </span>
+		    		 		</c:forEach>
+		    		 		ㄴ[RE]
+		    		 	</c:if>
+    		 		${vo.title}
+	    		 	</a>
 	    		 	</td>
 	    		 	<td>${vo.writer}</td>
 	    		 	<td>

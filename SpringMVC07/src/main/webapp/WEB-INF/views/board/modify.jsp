@@ -23,44 +23,46 @@
 	    <div class="panel-heading">Board</div>
 	    <div class="panel-body">Panel Content</div>
 	    <!-- 글을 가져오는 get -->
+	    <form action="${cpath}/board/modify" method="post">
 			<table class = "table table-bordered table-hover">
 				<tr>
 					<td>번호</td>
-					<td>${vo.idx }</td>
+					<td><input readonly="readonly" value="${vo.idx}" name="idx" type="text" class="form-control"> </td>
 				</tr>
 				<tr>
 					<td>제목</td>
-					<td>${vo.title }</td>
+					<td><input value="${vo.title }" class="form-control" name="title" type="text"></td>
 				</tr>
 				<tr>
 					<td>내용</td>
 					<td><!-- 게시글의 줄바꿈을 적용위해 textarea 사용 -->
-						<textarea class="form-control" readonly="readonly" rows="10" cols="">${vo.content}</textarea>
+						<textarea name="content" class="form-control" rows="10" cols="">${vo.content}></textarea>
 					</td>
 				</tr>
 				<tr>
 					<td>작성자</td>
-					<td>${vo.writer }</td>
+					<td><input readonly="readonly" value="${vo.writer }" class="form-control" name="writer" type="text"></td>
 				</tr>
 			
 				<tr>
 					<td colspan="2" style="text-align: center;">
-						<!-- 아래 c:if는 게시글 수정관련권한설정 -->
-						<c:if test="${not empty mvo}">
-						<button onclick="location.href='${cpath}/board/reply?idx=${vo.idx}'" class ="btn btn-sm btn-primary">답글</button>
-						<button onclick="location.href='${cpath}/board/modify?idx=${vo.idx}'" class ="btn btn-sm btn-success">수정</button>
+						
+						<c:if test="${not empty mvo && mvo.memID eq vo.memID }">
+							<button type="submit" class ="btn btn-sm btn-primary">수정</button>
+							<button type="button" onclick="location.href='${cpath}/board/remove?idx=${vo.idx}'" class ="btn btn-sm btn-success">삭제</button>
 						</c:if>
 						
-						<c:if test="${empty mvo}">
-						<button disabled="disabled" class="btn btn-sm btn-primary">답글</button>
-						<button disabled="disabled" onclick="location.href='${cpath}/board/modify?idx=${vo.idx}'" class ="btn btn-sm btn-success">수정</button>
+						<c:if test="${empty mvo or mvo.memID ne vo.memID }">
+							<button disabled="disabled" type="submit" class ="btn btn-sm btn-primary">수정</button>
+							<button disabled="disabled" type="button" onclick="location.href='${cpath}/board/remove?idx=${vo.idx}'" class ="btn btn-sm btn-success">삭제</button>
 						</c:if>
-
-						<button onclick="location.href='${cpath}/board/List'" class ="btn btn-sm btn-warning">목록</button>
-					
+						
+						<button type="button" onclick="location.href='${cpath}/board/List'" class ="btn btn-sm btn-warning">목록</button>
 					</td>
 				</tr>
-			</table>	    
+			</table>
+		</form>
+				    
 	    <div class="panel-footer">Panel Content</div>
 	  </div>
 	</div>
