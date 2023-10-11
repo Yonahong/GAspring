@@ -29,7 +29,7 @@
 				
 				<div class="form-group">
 					<label>제목</label>
-					<input value="${vo.title}" type="text" name="title" class="form-control">
+					<input value="<c:out value="${vo.title}" />" type="text" name="title" class="form-control">
 				</div>
 
 				<div class="form-group">
@@ -46,17 +46,39 @@
 				
 				<button type="submit" class="btn btn-default btn-sm">등록</button>
 				<button type="reset" class="btn btn-default btn-sm">취소</button>
-				<button onclick="location.href='${cpath}/board/List'" type="button" class="btn btn-default btn-sm">목록</button>
+				<button data-btn="list" class="btn btn-default btn-sm">목록</button>
 				
 				
 			</form>
 
+   			<form id="frm" method="get" action="">
+				<input id="idx" type="hidden" name="idx" value="${vo.idx}">
+			</form>
 	    
 	    <div class="panel-footer">Panel Content</div>
 	  </div>
 	</div>
 	
 	<script type="text/javascript">
+	
+	//링크처리
+	$(document).ready(function(){
+		$("button").on("click",function(e){
+			var formData = $("#frm");
+			//this는 클릭한 data-btn의 버튼명을 말함
+			var btn = $(this).data("btn");
+			//alert(btn);
+	
+			if(btn == "list"){
+				formData.attr("action","${cpath}/board/List");
+				formData.find("#idx").remove();
+			}
+			
+			//form태그를 누르면 submit이 작동되게함
+			formData.submit();
+			
+		});
+	});
 		
 	</script>
 	

@@ -68,6 +68,23 @@
 	    		 <tr>
 	    		 	<td>${i.count}</td>
 	    		 	<td>
+	    		 	
+	    		 	<!-- 삭제된 게시글 -->
+	    		 	<c:if test="${vo.boardAvailable == 0}">
+	    		 		<a href="javascript:alert('삭제된 게시글입니다.)">
+		    		 	<c:if test="${vo.boardLevel > 0}">
+		    		 		<c:forEach begin="0" end="${vo.boardLevel}" step="1">
+		    		 			<span style="padding-left: 15px"> </span>
+		    		 		</c:forEach>
+		    		 		ㄴ[RE]
+		    		 	</c:if>
+	    		 		
+	    		 		
+	    		 		삭제된 게시물입니다.
+	    		 		</a>
+	    		 	</c:if>
+	    		 	
+	    		 	<c:if test="${vo.boardAvailable > 0}">
 	    		 	<a href="${cpath}/board/get?idx=${vo.idx}">
 	    		 	<!-- 게시글 및 댓글 출력부 -->
 		    		 	<c:if test="${vo.boardLevel > 0}">
@@ -76,8 +93,11 @@
 		    		 		</c:forEach>
 		    		 		ㄴ[RE]
 		    		 	</c:if>
-    		 		${vo.title}
-	    		 	</a>
+		    		 	<!-- 스크립트를 태그가 아닌 문자로 받음 -->
+    		 			<c:out value="${vo.title}" />	
+		    		 	</a>
+    		 		</c:if>
+    		 		
 	    		 	</td>
 	    		 	<td>${vo.writer}</td>
 	    		 	<td>
@@ -86,7 +106,7 @@
 	    		 	<td>${vo.count}</td>
 	    		 	
 	    		 </tr>
-	    		 </c:forEach>
+	    		</c:forEach>
 	    	</tbody>
 	    	<c:if test="${not empty mvo}">
 		    	<tr>
