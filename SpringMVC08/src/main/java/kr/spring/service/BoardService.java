@@ -7,13 +7,14 @@ import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 
 
 import kr.spring.entity.Board;
+import kr.spring.entity.Criteria;
 import kr.spring.entity.Member;
 
 //Service 클래스에서 사용할 기능의 이름을 정의하는 인터페이스
 public interface BoardService {
 
 	//게시글 전체목록 보기 기능
-	public List<Board> getList();
+	public List<Board> getList(Criteria cri);
 
 	public Member login(Member vo);
 	
@@ -26,4 +27,6 @@ public interface BoardService {
 	public void remove(int idx);
 
 	public void reply(Board vo);
+
+	public int totalCount();
 }

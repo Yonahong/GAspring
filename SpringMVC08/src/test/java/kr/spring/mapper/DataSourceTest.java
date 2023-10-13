@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -22,6 +21,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.Module.SetupContext;
 
 import kr.spring.entity.Board;
+import kr.spring.entity.Criteria;
+import kr.spring.service.BoardServiceImpl;
 import lombok.extern.log4j.Log4j;
 
 
@@ -42,7 +43,7 @@ public class DataSourceTest {
    private BoardMapper mapper;
 
    @Autowired
-   private kr.spring.service.BoardServiceImpl Service;
+   private BoardServiceImpl Service;
    
    @Autowired
    private WebApplicationContext ctx; // Spring Container (스프링 모든 객체가 들어있는 공간) 객체
@@ -71,16 +72,16 @@ public class DataSourceTest {
 //	   mapper.insertSelectKey(vo);
 //   }
    
-   @Test
-   public void testController() throws Exception{
-      
-      log.info(
-               mockMvc.perform(MockMvcRequestBuilders.get("/board/modify?idx=3"))//perform->요청
-               .andReturn() // return값을 받아오겠다.
-               .getModelAndView() // controller의 model값과 view경로를 호출
-            );
-      
-   }
+//   @Test
+//   public void testController() throws Exception{
+//      
+//      log.info(
+//               mockMvc.perform(MockMvcRequestBuilders.get("/board/modify?idx=3"))//perform->요청
+//               .andReturn() // return값을 받아오겠다.
+//               .getModelAndView() // controller의 model값과 view경로를 호출
+//            );
+//      
+//   }
    
 //   @Test
 //   public void testGetList() {
@@ -93,13 +94,16 @@ public class DataSourceTest {
 //   }
    
 //   테스트는 1개씩만 가능함으로 이전 테스트는 주석처리
-//   @Test
-//   public void testGetList() {
-//      List<Board> list = mapper.getList();
-//      for (Board vo : list) {
-//         System.out.println(vo.toString());
-//      }
-//   }
+   @Test
+   public void testGetList() {
+	   
+	  Criteria cri = new Criteria();
+	   
+      List<Board> list = Service.getList(cri);
+      for (Board vo : list) {
+         System.out.println(vo.toString());
+      }
+   }
    
 //   @Test
 //   public void testConnection() {

@@ -22,39 +22,35 @@
 	  <div class="panel panel-default">
 	    <div class="panel-heading">Board</div>
 	    <div class="panel-body">Panel Content</div>
-			<form action="${cpath}/board/reply" method="post">
+			<form id="frm" method="post">
 			
-				<input type="hidden" name="memID" value="${mvo.memID}">
-				<input type="hidden" name="idx" value="${vo.idx}">
+				<input type="hidden" name="page" value="${cri.page}"> 
+				<input type="hidden" name="perPageNum" value="${cri.perPageNum}"> 
+			
+				<input id="memID" type="hidden" name="memID" value="${mvo.memID}">
+				<input id="idx"type="hidden" name="idx" value="${vo.idx}">
+				
 				
 				<div class="form-group">
 					<label>제목</label>
-					<input value="<c:out value="${vo.title}" />" type="text" name="title" class="form-control">
+					<input id="title" value="<c:out value="${vo.title}" />" type="text" name="title" class="form-control">
 				</div>
 
 				<div class="form-group">
 					<label>답변</label>
-					<textarea name="content" rows="10" cols="" class="form-control"></textarea>
+					<textarea id="content" name="content" rows="10" cols="" class="form-control"></textarea>
 				</div>
 
 				<div class="form-group">
 					<label>작성자</label>
-					<input value="${mvo.memName}" readonly="readonly" type="text" name="writer" class="form-control">
+					<input id="writer" value="${mvo.memName}" readonly="readonly" type="text" name="writer" class="form-control">
 				</div>
 				
-				
-				
-				<button type="submit" class="btn btn-default btn-sm">등록</button>
-				<button type="reset" class="btn btn-default btn-sm">취소</button>
+				<button data-btn="reply" type="button" class="btn btn-default btn-sm">답변</button>
+				<button data-btn="reset" type="button" class="btn btn-default btn-sm">취소</button>
 				<button data-btn="list" class="btn btn-default btn-sm">목록</button>
 				
-				
 			</form>
-
-   			<form id="frm" method="get" action="">
-				<input id="idx" type="hidden" name="idx" value="${vo.idx}">
-			</form>
-	    
 	    <div class="panel-footer">Panel Content</div>
 	  </div>
 	</div>
@@ -72,6 +68,21 @@
 			if(btn == "list"){
 				formData.attr("action","${cpath}/board/List");
 				formData.find("#idx").remove();
+				formData.attr("method","get")
+				
+				formData.find("#memID").remove();
+				formData.find("#title").remove();
+				formData.find("#content").remove();
+				formData.find("#writer").remove();
+				
+			}else if(btn=="reply"){
+				formData.attr("action", "${cpath}/board/reply")
+			}else if(btn=="reset"){
+				formData[0].reset();
+			//모든 버튼 클릭 시 submit이 되게 되어있어 취소를 누르더라도 등록이 되고있음.
+			//아래 submit까지 가지 않고 끝내는 방법인 return 사용
+				return;
+				
 			}
 			
 			//form태그를 누르면 submit이 작동되게함

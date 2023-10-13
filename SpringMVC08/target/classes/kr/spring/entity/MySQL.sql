@@ -19,19 +19,19 @@ CREATE TABLE TBLBOARD(
 INSERT INTO TBLBOARD
 -- IDX를 확인하여 NULL이면 값에 1을 더한값을 넣어주고 첫글이라면 1로 처리함 --
 SELECT IFNULL(MAX(IDX+1),1),
-'admin', '공지사항입니다.', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
+'admin', '공지사항입니다7.', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
 NOW(), 0, IFNULL(MAX(BOARDGROUP+1),1),0,0,1
 FROM TBLBOARD;
 
 INSERT INTO TBLBOARD
 SELECT IFNULL(MAX(IDX+1),1),
-'admin', '공지사항입니다2222.', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
+'admin', '3434343434.', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
 NOW(), 0, IFNULL(MAX(BOARDGROUP+1),1),0,0,1
 FROM TBLBOARD;
 
 INSERT INTO TBLBOARD
 SELECT IFNULL(MAX(IDX+1),1),
-'admin', '공지사항입니다.3333', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
+'admin', '공지사항입니다.555555', '다음주 월요일 정상 등원하겠슴.', '교육운영부',
 NOW(), 0, IFNULL(MAX(BOARDGROUP+1),1),0,0,1
 FROM TBLBOARD;
 

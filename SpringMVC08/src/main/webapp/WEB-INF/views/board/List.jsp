@@ -85,11 +85,12 @@
 	    		 	</c:if>
 	    		 	
 	    		 	<c:if test="${vo.boardAvailable > 0}">
-	    		 	<a href="${cpath}/board/get?idx=${vo.idx}">
+	    		 	<a class="move" href="${vo.idx}">
+	    		 	
 	    		 	<!-- 게시글 및 댓글 출력부 -->
 		    		 	<c:if test="${vo.boardLevel > 0}">
 		    		 		<c:forEach begin="0" end="${vo.boardLevel}" step="1">
-		    		 			<span style="padding-left: 15px"> </span>
+		    		 			<span style="padding-left: 15px"></span>
 		    		 		</c:forEach>
 		    		 		ㄴ[RE]
 		    		 	</c:if>
@@ -116,6 +117,45 @@
 		    	</tr>
 	    	</c:if>
 	    </table>
+	    
+	    <div style="text-align:center;">
+		  <ul class="pagination">
+			
+			<!-- 이전버튼처리 -->			
+			<c:if test="${pageMaker.prev}">
+				<li class="paginate_button previous">
+					<a href="${pageMaker.startPage - 1}">←</a>
+				</li>
+			</c:if>
+			
+			
+			<!-- 페이지 번호처리 -->
+			<c:forEach var="pageNum" begin="${pageMaker.startPage}" end="${pageMaker.endPage}">
+			
+				<c:if test="${pageMaker.cri.page == pageNum}">
+					<li class="paginate_button active"><a href="${pageNum}">${pageNum}</a></li>
+				</c:if>
+				
+				<c:if test="${pageMaker.cri.page != pageNum}">
+					<li class="paginate_button"><a href="${pageNum}">${pageNum}</a></li>
+				</c:if>
+			</c:forEach>
+
+			<!-- 다음버튼처리 -->
+			<c:if test="${pageMaker.next}">
+				<li class="paginate_button previous">
+					<a href="${pageMaker.endPage + 1}">→</a>
+				</li>
+			</c:if>
+		  </ul>
+			
+			<!-- 이전,다음버튼의 경로처리를 위한 form태그 a태그에는 숫자만 넣고 form태그를 통해 작동시켜 중복을 제거하는식 -->
+			<form action="${cpath}/board/List" id="pageFrm">
+				<input type ="hidden" id="page" name="page" value="${pageMaker.cri.page}">
+				<input type ="hidden" id="perPageNum" name="perPageNum" value="${pageMaker.cri.perPageNum}">
+			</form> 
+			
+		</div>
 	    
 	    
 	    <div class="panel-footer">Panel Content</div>
@@ -147,8 +187,37 @@
 	
 	
 	<script type="text/javascript">
+	
+	
+	
+	
 		
 		$(document).ready(function(){
+			
+			//페이지 번호 클릭 시 이동하기
+			var pageFrm = $("#pageFrm");
+			//li 태그 안의 a 태그값을 가져와서 from태그에 적용시켜 페이지를 이동함
+			//클래스임으로 .을 적어주고 부모가 페이지네이트버튼인 a 태그를 클릭했을 때 함수실행
+			$(".paginate_button a").on("click",function(e){
+				//e->현재 클릭한 a태그 요소 자체를 말함.
+				
+				e.preventDefault(); //기본 a태그의 href속성 작동 막기
+				var page = $(this).attr("href"); // 클릭한 a태그의 href값 가져오기
+				pageFrm.find("#page").val(page);
+				pageFrm.submit();
+				
+			});
+			
+			//상세보기 클릭 시 이동
+			$(".move").on("click",function(e){
+				e.preventDefault();
+				var idx = $(this).attr("href");//클릭한 해당 a태그(여기서는 move)의 속성(attr)중 href를 가져올것임
+				var tag = "<input type = 'hidden' name='idx' value='"+idx+"'>"
+				pageFrm.append(tag);
+				pageFrm.attr("action", "${cpath}/board/get");
+				pageFrm.submit();
+			});
+			
 			
 			var result = "${result}";
 			checkModal(result);
