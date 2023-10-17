@@ -67,7 +67,11 @@
 			<!-- form태그 안에 form태그가 들어가는 것은 지양함. -->
 				
 				<input type="hidden" name="page" value="${cri.page}">
-				<input type="hidden" name="perPageNum" value="${perPageNum}"
+				<input type="hidden" name="perPageNum" value="${cri.perPageNum}"
+				
+				<!-- 검색하는 type과 keyword를 넘기기  위한 부분 -->
+				<input type ="hidden" name="type" value="${cri.type}">
+				<input type ="hidden" name="keyword" value="${cri.keyword}">
 			</form>
 				    
 	    <div class="panel-footer">Panel Content</div>

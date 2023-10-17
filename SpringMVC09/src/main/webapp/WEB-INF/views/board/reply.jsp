@@ -26,6 +26,9 @@
 			
 				<input type="hidden" name="page" value="${cri.page}"> 
 				<input type="hidden" name="perPageNum" value="${cri.perPageNum}"> 
+				<!-- 검색하는 type과 keyword를 넘기기  위한 부분 -->
+				<input type ="hidden" name="type" value="${cri.type}">
+				<input type ="hidden" name="keyword" value="${cri.keyword}">
 			
 				<input id="memID" type="hidden" name="memID" value="${mvo.memID}">
 				<input id="idx"type="hidden" name="idx" value="${vo.idx}">
@@ -49,6 +52,7 @@
 				<button data-btn="reply" type="button" class="btn btn-default btn-sm">답변</button>
 				<button data-btn="reset" type="button" class="btn btn-default btn-sm">취소</button>
 				<button data-btn="list" class="btn btn-default btn-sm">목록</button>
+				
 				
 			</form>
 	    <div class="panel-footer">Panel Content</div>

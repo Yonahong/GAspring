@@ -65,7 +65,9 @@
 			<form id="frm" method="get" action="">
 				<input id="idx" type="hidden" name="idx" value="${vo.idx}">
 				<input type="hidden" name="page" value="${cri.page}">
-				<input type="hidden" name="perPageNum" value="${perPageNum}"
+				<input type="hidden" name="perPageNum" value="${cri.perPageNum}">
+				<input type ="hidden" name="type" value="${cri.type}">
+				<input type ="hidden" name="keyword" value="${cri.keyword}">
 			</form>
 			
 		</div>	
